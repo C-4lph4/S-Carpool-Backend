@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebSocket Example</title>
+  </head>
+  <body>
+    <h1>WebSocket Example</h1>
+    <div id="messages"></div>
+    <input type="text" id="messageInput" />
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+      const wsProtocol =
+        window.location.protocol === "https:" ? "wss://" : "ws://";
+      const wsPath = wsProtocol + window.location.host + "/ws/share_loc/";
+      const ws = new WebSocket(wsPath);
+
+      ws.onopen = function () {
+        console.log("WebSocket connection established.");
+      };
+
+      ws.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        console.log("Received message from server:", data);
+        displayMessage(data.msg);
+      };
+
+      ws.onerror = function (event) {
+        console.error("WebSocket error:", event);
+      };
+
+      function sendMessage() {
+        const messageInput = document.getElementById("messageInput");
+        const message = messageInput.value;
+        ws.send(JSON.stringify({ msg: message }));
+        messageInput.value = "";
+      }
+
+      function displayMessage(message) {
+        const messagesDiv = document.getElementById("messages");
+        const messageElement = document.createElement("div");
+        messageElement.textContent = message;
+        messagesDiv.appendChild(messageElement);
+      }
+    </script>
+  </body>
+</html>
