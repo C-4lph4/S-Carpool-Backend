@@ -9,22 +9,27 @@ https://docs.djangoproject.com/en/5.0/howto/deployment/asgi/
 
 import os
 import django
-from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack
-import core_api.routing
+from django.core.asgi import get_asgi_application
 from core_api.middleware import TokenAuthMiddleware
+import core_api.routing
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "s_carpool.settings")
 
-# Initialize Django
+# Ensure Django setup is called before importing models
 django.setup()
 
+# Print statement for debugging
+print(f"DJANGO_SETTINGS_MODULE: {os.getenv('DJANGO_SETTINGS_MODULE')}")
+print("Django settings loaded successfully.")
+
+# Define the authentication middleware
+auth = TokenAuthMiddleware(URLRouter(core_api.routing.websocket_urlpatterns))
+
+# Define the ASGI application
 application = ProtocolTypeRouter(
     {
         "http": get_asgi_application(),
-        "websocket": AuthMiddlewareStack(
-            TokenAuthMiddleware(URLRouter(core_api.routing.websocket_urlpatterns))
-        ),
+        "websocket": auth,
     }
 )
