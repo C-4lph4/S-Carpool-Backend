@@ -7,7 +7,7 @@ For more information on this file, see
 https://docs.djangoproject.com/en/5.0/howto/deployment/asgi/
 """
 
-import os
+import os, django
 
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
@@ -18,7 +18,7 @@ import core_api.routing
 # from core_api.middleware import TokenAuthMiddleware
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "s_carpool.settings")
-
+django.setup()
 auth = TokenAuthMiddleware(URLRouter(core_api.routing.websocket_urlpatterns))
 
 application = ProtocolTypeRouter(
