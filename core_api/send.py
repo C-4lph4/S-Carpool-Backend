@@ -3,6 +3,7 @@ import random
 import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import threading
 
 sender = os.getenv("EMAIL")
 password = os.getenv("PASSWORD")
@@ -35,6 +36,7 @@ def send_code(receiver):
             print(e)
             print("Failed to send email")
 
-    send_mail(sender, receiver, message)
+    email_thread = threading.Thread(target=send_mail, args=(sender, receiver, message))
+    email_thread.start()
 
     return code
