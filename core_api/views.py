@@ -22,6 +22,7 @@ from .send import send_code
 
 from datetime import datetime, timedelta
 import os
+from threading import Thread
 
 
 # Create your views
@@ -58,34 +59,27 @@ def confirmEmail(request):
 def signUP(request):
     try:
         username = request.data.get("username")
-
         password = request.data.get("password")
-
         email = request.data.get("email")
         language = request.data.get("language")
 
         if not username or not password or not email:
             return Response(
-                {"message": "username,email and password are required"}, status=400
+                {"message": "username, email and password are required"}, status=400
             )
 
         if ActiveUser.objects.filter(email=email).exists():
-            return Response(
-                {"message": "An account with the same email exists"}, status=400
-            )
+            return Response({"message": "Account exists"}, status=400)
 
         user_manager = ActiveUserManager()
-
         user = user_manager.createUser(
             email=email, password=password, user_name=username, language=language
         )
 
-        code = generate_code(email, activeuser=user)
-        if code:
-            return Response({"message": "success"}, status=201)
-        else:
-            user.delete()
-            return Response({"message": "An error occured"}, status=400)
+        # Start a new thread for code generation
+        Thread(target=generate_code, args=(email, user)).start()
+
+        return Response({"message": "success"}, status=201)
 
     except Exception as e:
         return Response({"message": "Failed"}, status=400)
